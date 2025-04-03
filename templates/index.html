@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 10px 20px;
+            background: #0f0f0f;
+            border-bottom-left-radius: 10px;
+            box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .header span {
+            margin-right: 10px;
+        }
+
+        .header button {
+            background: blue;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .header button:hover {
+            background: blue;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #0f0f0f;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-right: 3px solid #026fff;
+            box-shadow: 4px 0 10px rgba(4, 155, 255, 0.6);
+            height: 100vh;
+        }
+    
+        .sidebar h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 22px;
+            color: blue;
+        }
+    
+        .new-chat-btn, .clear-history-btn {
+            width: 100%;
+            background: blue;
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: 0.3s ease-in-out;
+            margin-bottom: 10px;
+        }
+    
+        .new-chat-btn:hover, .clear-history-btn:hover {
+            background: blue;
+            transform: scale(1.05);
+        }
+    
+        .chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 55vh;
+            margin-bottom: 10px;
+        }
+    
+        .chat-history p {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #333;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+    
+        .chat-history p:hover {
+            background: #0569ff;
+            color: #fff;
+        }
+
+        .chat-history p .delete-btn {
+            background:blue;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .chat-history p .delete-btn:hover {
+            background: #b22234;
+        }
+
+        /* Main Chat Section */
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin-top: 60px; /* To accommodate the header */
+        }
+        
+        /* Chat Messages */
+        .chat-box {
+            width: 90%;
+            max-width: 700px;
+            text-align: left;
+            max-height: 500px;
+            overflow-y: auto;
+            background: #222;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #0c8aff;
+            box-shadow: 0 0 15px rgba(3, 119, 252, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 15px;
+            font-size: 18px;
+            max-width: 75%;
+            word-wrap: break-word;
+            display: inline-block;
+            position: relative;
+        }
+
+        .user-message {
+            background:black;
+            align-self: flex-end;
+            color: blue;
+            text-align: right;
+            border-top-right-radius: 0;
+            box-shadow: 2px 2px 10px rgba(230, 57, 70, 0.6);
+        }
+
+        .bot-message {
+            background: #000000;
+            align-self: flex-start;
+            color: rgb(172, 164, 164);
+            text-align: left;
+            border-top-left-radius: 0;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .bot-message h1, .bot-message h2, .bot-message h3, .bot-message h4, .bot-message h5, .bot-message h6 {
+            margin-top: 0;
+            color: white;
+        }
+
+        .bot-message ul, .bot-message ol {
+            padding-left: 20px;
+        }
+
+        .bot-message li {
+            margin-bottom: 10px;
+        }
+
+        .bot-message strong {
+            font-weight: bold;
+        }
+
+        .bot-message em {
+            font-style: italic;
+        }
+
+        /* Input Area */
+        .input-box {
+            display: flex;
+            width: 100%;
+            max-width: 700px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #2d2d2d;
+            color: white;
+        }
+        button {
+            padding: 12px;
+            border: none;
+            background: blue;
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: blue;
+        }
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        /* Like/Dislike Buttons */
+        .rating-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .rating-buttons button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .rating-buttons button.like {
+            color: green;
+        }
+
+        .rating-buttons button.dislike {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <span>Logged in as: {{ email }}</span>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3>Chat History</h3>
+        <button class="new-chat-btn" onclick="clearChat()">+ New Chat</button>
+        <button class="clear-history-btn" onclick="deleteChatHistory()">🗑 Clear Chat History</button>
+        <div class="chat-history" id="chat-history"></div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="chat-container">
+        <h2>Chatbot</h2>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-box">
+            <input type="text" id="user-input" placeholder="Ask something..." oninput="toggleSendButton()">
+            <button id="send-button" onclick="sendMessage()" disabled>Send</button>
+        </div>
+    </div>
+
+    <!-- Include Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        function toggleSendButton() {
+            let userInput = document.getElementById('user-input').value.trim();
+            document.getElementById('send-button').disabled = !userInput;
+        }
+
+        async function sendMessage() {
+            let userInput = document.getElementById('user-input').value.trim();
+            if (!userInput) return;
+            
+            let chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<p class="message user-message"><strong>You:</strong> ${userInput}</p>`;
+            document.getElementById('user-input').value = '';
+            document.getElementById('send-button').disabled = true;
+
+            try {
+                let response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: userInput })
+                });
+
+                let data = await response.json();
+                if (response.ok) {
+                    // Parse Markdown and render as HTML
+                    let formattedResponse = marked.parse(data.data || "No response available.");
+                    chatBox.innerHTML += `
+                        <div class="message bot-message">
+                            ${formattedResponse}
+                            <div class="rating-buttons">
+                                <button class="like" onclick="rateChat('${data.chat_id}', 'like')">👍</button>
+                                <button class="dislike" onclick="rateChat('${data.chat_id}', 'dislike')">👎</button>
+                            </div>
+                        </div>
+                    `;
+                    loadChatHistory(); // Reload chat history after sending a message
+                } else {
+                    chatBox.innerHTML += `<p class="message bot-message"><strong>Error:</strong> ${data.error || "Something went wrong."}</p>`;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                chatBox.innerHTML += `<p class="message bot-message"><strong>Error:</strong> Failed to get a response.</p>`;
+            }
+
+            document.getElementById('send-button').disabled = false;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function loadChatHistory() {
+            try {
+                let response = await fetch('/get_chat_history');
+                let data = await response.json();
+                if (response.ok) {
+                    let historyContainer = document.getElementById("chat-history");
+                    historyContainer.innerHTML = "";
+
+                    data.chat_history.forEach((chat, index) => {
+                        let chatItem = document.createElement("p");
+                        chatItem.innerHTML = `
+                            <span>Chat ${index + 1}: ${chat.question}</span>
+                            <button class="delete-btn" onclick="deleteChat('${chat._id}', event)">Delete</button>
+                        `;
+                        chatItem.onclick = () => loadChat(chat);
+                        historyContainer.appendChild(chatItem);
+                    });
+                } else {
+                    console.error("Error fetching chat history:", data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function loadChat(chat) {
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = ""; 
+            chatBox.innerHTML += `<p class="message user-message"><strong>You:</strong> ${chat.question}</p>`;
+            chatBox.innerHTML += `
+                <div class="message bot-message">
+                    ${marked.parse(chat.answer)}
+                    <div class="rating-buttons">
+                        <button class="like" onclick="rateChat('${chat._id}', 'like')">👍</button>
+                        <button class="dislike" onclick="rateChat('${chat._id}', 'dislike')">👎</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function deleteChat(chatId, event) {
+            event.stopPropagation(); // Prevent the chat from being loaded when deleting
+            if (!confirm("Are you sure you want to delete this chat?")) return;
+        
+            try {
+                let response = await fetch(`/delete_chat/${chatId}`, { method: 'DELETE' });
+                let data = await response.json();
+
+                if (response.ok) {
+                    alert("Chat deleted successfully.");
+                    loadChatHistory(); // Reload chat history after deletion
+                } else {
+                    alert("Failed to delete chat: " + data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error deleting chat.");
+            }
+        }
+
+        async function deleteChatHistory() {
+            if (!confirm("Are you sure you want to delete all chat history?")) return;
+        
+            try {
+                let response = await fetch('/delete_chat_history', { method: 'DELETE' });
+                let data = await response.json();
+
+                if (response.ok) {
+                    alert("Chat history deleted successfully.");
+                    loadChatHistory(); // Reload chat history after deletion
+                } else {
+                    alert("Failed to delete chat history: " + data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error deleting chat history.");
+            }
+        }
+
+        async function rateChat(chatId, action) {
+            try {
+                let response = await fetch(`/rate_chat/${chatId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action })
+                });
+
+                let data = await response.json();
+                if (response.ok) {
+                    console.log(`Chat ${action}d successfully.`);
+                } else {
+                    console.log("Failed to rate chat: " + data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error rating chat.");
+            }
+        }
+
+        function clearChat() {
+            document.getElementById("chat-box").innerHTML = "";
+        }
+
+        async function logout() {
+            try {
+                let response = await fetch('/logout', { method: 'POST' });
+                let data = await response.json();
+
+                if (response.ok) {
+                    window.location.href = "/"; // Redirect to login page
+                } else {
+                    alert("Failed to logout: " + data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error logging out.");
+            }
+        }
+
+        window.onload = loadChatHistory;
+    </script>
+</body>
+</html>

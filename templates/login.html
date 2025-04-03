@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Login & Signup Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            background: #151515;
+        }
+        .form-container {
+            width: 370px;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .form-box {
+            width: 100%;
+            background: #1b1b1b;
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 1px #272727;
+            display: none;
+        }
+        .form-box.active {
+            display: block;
+        }
+        .text {
+            font-size: 30px;
+            color: #c7c7c7;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .field {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .field .fas {
+            height: 50px;
+            width: 50px;
+            color: #868686;
+            font-size: 20px;
+            line-height: 50px;
+            text-align: center;
+            border: 1px solid #444;
+            border-right: none;
+            border-radius: 5px 0 0 5px;
+            background: linear-gradient(#333, #222);
+        }
+        .field input {
+            height: 50px;
+            width: 100%;
+            outline: none;
+            font-size: 19px;
+            color: #868686;
+            padding: 0 15px;
+            border-radius: 0 5px 5px 0;
+            border: 1px solid #444;
+            background: linear-gradient(#333, #222);
+        }
+        button {
+            margin-top: 20px;
+            height: 50px;
+            width: 100%;
+            border-radius: 5px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            background: linear-gradient(#333, #222);
+            color: #868686;
+            border: 1px solid #444;
+        }
+        .link {
+            margin-top: 15px;
+            color: #868686;
+            text-align: center;
+        }
+        .link a {
+            color: #339933;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: white;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Login Form -->
+        <div class="form-box active" id="login-form">
+            <div class="text">LOGIN</div>
+            <form id="loginForm">
+                <div class="field">
+                    <div class="fas fa-envelope"></div>
+                    <input type="text" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="field">
+                    <div class="fas fa-lock"></div>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                <button type="submit">LOGIN</button>
+                <div class="error-message" id="loginError"></div>
+                <div class="link">Not a member? <a onclick="toggleForms()">Signup now</a></div>
+            </form>
+        </div>
+        <!-- Signup Form -->
+        <div class="form-box" id="signup-form">
+            <div class="text">SIGNUP</div>
+            <form id="signupForm">
+                <div class="field">
+                    <div class="fas fa-envelope"></div>
+                    <input type="text" id="signupEmail" placeholder="Email" required>
+                </div>
+                <div class="field">
+                    <div class="fas fa-lock"></div>
+                    <input type="password" id="signupPassword" placeholder="Password" required>
+                </div>
+                <button type="submit">SIGNUP</button>
+                <div class="error-message" id="signupError"></div>
+                <div class="link">Already a member? <a onclick="toggleForms()">Login now</a></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function toggleForms() {
+            document.getElementById('login-form').classList.toggle('active');
+            document.getElementById('signup-form').classList.toggle('active');
+        }
+
+        // Login Function
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            fetch("http://127.0.0.1:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("loginError").innerText = data.error;
+                    document.getElementById("loginError").style.display = "block";
+                } else {
+                    window.location.href = "/chat"; // Redirect to chat page
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        // Signup Function
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const email = document.getElementById("signupEmail").value;
+            const password = document.getElementById("signupPassword").value;
+            fetch("http://127.0.0.1:5000/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("signupError").innerText = data.error;
+                    document.getElementById("signupError").style.display = "block";
+                } else {
+                    alert("Signup successful! Please login.");
+                    toggleForms(); // Switch to login form after signup
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
